@@ -5,87 +5,61 @@
 #                                                     +:+ +:+         +:+      #
 #    By: tlaranje <tlaranje@student.42porto.com>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2025/11/11 15:14:39 by tlaranje          #+#    #+#              #
-#    Updated: 2025/11/12 11:58:40 by tlaranje         ###   ########.fr        #
+#    Created: 2025/11/12 16:40:03 by tlaranje          #+#    #+#              #
+#    Updated: 2025/11/12 16:40:04 by tlaranje         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-# NAME
-EXEC_NAME	= so_long
+# Diretórios
+SRC_DIR_MANDATORY := src/Mandatory
+SRC_DIR_BONUS := src/Bonus
+OBJ_DIR := obj
+INC_DIR := inc
 
-# COMMANDS
-CC			= cc
-CFLAGS		= -Wall -Wextra -Werror -I$(INC_DIR) -I$(LIBFT_DIR) -I$(MLX_DIR)
-AR			= ar rcs
-RM			= rm -rf
-MD			= mkdir -p
-CP			= cp
-MAKE_C		= make -C
+# Compilador e flags
+CC := gcc
+CFLAGS := -Wall -Wextra -Werror -I$(INC_DIR)
 
-# DIRECTORIES
-SRC_DIR		= src/
-INC_DIR		= inc/
-OBJ_DIR		= obj/
-MDT_DIR		= $(SRC_DIR)Mandatory/
-BONUS_DIR	= $(SRC_DIR)Bonus/
+# Fontes
+MANDATORY_SRC := $(wildcard $(SRC_DIR_MANDATORY)/*.c)
+BONUS_SRC := $(wildcard $(SRC_DIR_BONUS)/*.c)
 
-# MANDATORY SOURCES AND OBJS
-SRC_FILES	= $(wildcard $(MDT_DIR)*.c)
-OBJ_FILES	= $(SRC_FILES:$(MDT_DIR)%.c=$(OBJ_DIR)%.o)
+# Objetos
+MANDATORY_OBJ := $(patsubst $(SRC_DIR_MANDATORY)/%.c,$(OBJ_DIR)/%.o,$(MANDATORY_SRC))
+BONUS_OBJ := $(patsubst $(SRC_DIR_BONUS)/%.c,$(OBJ_DIR)/bonus_%.o,$(BONUS_SRC))
 
-# BONUS SOURCES AND OBJS
-BONUS_SRC	= $(wildcard $(BONUS_DIR)*.c)
-BONUS_OBJS	= $(BONUS_SRC:$(BONUS_DIR)%.c=$(OBJ_DIR)%.o)
+# Executáveis
+NAME := so_long
+BONUS_NAME := so_long_bonus
 
-# LIBFT
-LIBFT_DIR	= libft/
-LIBFT		= $(LIBFT_DIR)libft.a
+# Targets
+.PHONY: all bonus clean fclean re
 
-# MLX
-MLX_DIR		= mlx_linux
-MLX_REPO	= https://github.com/42Paris/minilibx-linux.git
-MLX_LIB		= -L$(MLX_DIR) -lmlx -lXext -lX11 -lm
+all: $(OBJ_DIR) $(NAME)
 
-# RULES
-all: mlx libft $(EXEC_NAME)
+bonus: $(OBJ_DIR) $(BONUS_NAME)
 
-bonus: SRC_FILES := $(SRC_FILES) $(BONUS_SRC)
-bonus: OBJ_FILES := $(OBJ_FILES) $(BONUS_OBJS)
-bonus: all
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
 
-# MANDATORY
-$(OBJ_DIR)%.o: $(MDT_DIR)%.c
-	@$(MD) $(OBJ_DIR)
-	@$(CC) $(CFLAGS) -c $< -o $@
+# Regras para objetos
+$(OBJ_DIR)/%.o: $(SRC_DIR_MANDATORY)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
-# BONUS
-$(OBJ_DIR)%.o: $(BONUS_DIR)%.c
-	@$(MD) $(OBJ_DIR)
-	@$(CC) $(CFLAGS) -c $< -o $@
+$(OBJ_DIR)/bonus_%.o: $(SRC_DIR_BONUS)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
-# EXEC
-$(EXEC_NAME): $(OBJ_FILES)
-	@$(CC) $(CFLAGS) $^ $(LIBFT) $(MLX_LIB) -o $(EXEC_NAME)
+# Linkagem final
+$(NAME): $(MANDATORY_OBJ)
+	$(CC) $(MANDATORY_OBJ) -o $@
 
-# LIBFT
-libft:
-	@$(MAKE_C) $(LIBFT_DIR)
+$(BONUS_NAME): $(BONUS_OBJ)
+	$(CC) $(BONUS_OBJ) -o $@
 
-# MINILIBX
-mlx:
-	@if [ ! -d "$(MLX_DIR)" ]; then git clone $(MLX_REPO) $(MLX_DIR); fi
-	@$(MAKE_C) $(MLX_DIR)
-
-# CLEANING
 clean:
-	@$(RM) $(OBJ_DIR)
-	@$(MAKE_C) $(LIBFT_DIR) clean
-	@$(MAKE_C) $(MLX_DIR) clean
+	rm -rf $(OBJ_DIR)
 
 fclean: clean
-	@$(RM) $(EXEC_NAME)
-	@$(MAKE_C) $(LIBFT_DIR) fclean
+	rm -f $(NAME) $(BONUS_NAME)
 
 re: fclean all
-
-.PHONY: all clean fclean re
