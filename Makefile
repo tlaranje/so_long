@@ -6,17 +6,18 @@
 #    By: tlaranje <tlaranje@student.42porto.com>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/11/11 15:14:39 by tlaranje          #+#    #+#              #
-#    Updated: 2025/11/11 16:49:21 by tlaranje         ###   ########.fr        #
+#    Updated: 2025/11/12 11:04:36 by tlaranje         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 # NAME
 NAME		= so_long.a
 BONUS_NAME	= so_long_bonus.a
+EXEC_NAME	= so_long
 
 # COMMANDS
 CC			= cc
-CFLAGS		= -Wall -Wextra -Werror -I$(INC_DIR) -I$(LIBFT_DIR)
+CFLAGS		= -Wall -Wextra -Werror -I$(INC_DIR) -I$(LIBFT_DIR) -I$(MLX_DIR)
 AR			= ar rcs
 RM			= rm -rf
 MD			= mkdir -p
@@ -42,15 +43,20 @@ BONUS_OBJS	= $(BONUS_SRC:$(BONUS_DIR)%.c=$(OBJS_DIR)%.o)
 LIBFT_DIR	= libft/
 LIBFT		= $(LIBFT_DIR)libft.a
 
+# MLX
+MLX_DIR		= mlx_linux
+MLX_REPO	= https://github.com/42Paris/minilibx-linux.git
+MLX_LIB		= -L$(MLX_DIR) -lmlx -lXext -lX11 -lm
+
 # RULES
-all: $(NAME)
+all: $(MLX_DIR) $(NAME) $(EXEC_NAME)
 
 bonus: all $(BONUS_NAME)
 
 # MANDATORY RULES
 $(NAME): $(MDT_OBJS)
-	@$(MD) $(OBJS_DIR)
-	@$(MAKE_C) $(LIBFT_DIR) --no-print-directory
+	@$(MAKE_C) $(LIBFT_DIR)
+	@$(MAKE_C) $(MLX_DIR)
 	@$(CP) $(LIBFT) $(NAME)
 	@$(AR) $@ $^
 
@@ -68,13 +74,22 @@ $(OBJS_DIR)%.o: $(BONUS_DIR)%.c
 	@$(MD) $(OBJS_DIR)
 	@$(CC) $(CFLAGS) -c $< -o $@
 
+# EXEC RULES
+$(EXEC_NAME): $(NAME)
+	@$(CC) $(CFLAGS) $(NAME) $(MLX_LIB) -o $(EXEC_NAME)
+
+# MINILIBX RULES
+$(MLX_DIR):
+	@git clone $(MLX_REPO) $(MLX_DIR)
+
 # OTHERS RULES
 clean:
 	@$(RM) $(OBJS_DIR)
 	@$(MAKE_C) $(LIBFT_DIR) clean
+	@$(MAKE_C) $(MLX_DIR) clean
 
 fclean: clean
-	@$(RM) $(NAME) $(BONUS_NAME)
+	@$(RM) $(NAME) $(BONUS_NAME) $(EXEC_NAME) $(MLX_DIR)
 	@$(MAKE_C) $(LIBFT_DIR) fclean
 
 re: fclean all

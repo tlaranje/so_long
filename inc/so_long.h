@@ -6,13 +6,14 @@
 /*   By: tlaranje <tlaranje@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 14:10:34 by tlaranje          #+#    #+#             */
-/*   Updated: 2025/11/11 14:28:39 by tlaranje         ###   ########.fr       */
+/*   Updated: 2025/11/12 10:49:59 by tlaranje         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SO_LONG
 # define SO_LONG
 
-# include "libft.h"
+# include "../libft/libft.h"
+# include "../mlx_linux/mlx.h"
 
 #endif
