@@ -6,13 +6,11 @@
 #    By: tlaranje <tlaranje@student.42porto.com>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/11/11 15:14:39 by tlaranje          #+#    #+#              #
-#    Updated: 2025/11/12 11:04:36 by tlaranje         ###   ########.fr        #
+#    Updated: 2025/11/12 11:58:40 by tlaranje         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 # NAME
-NAME		= so_long.a
-BONUS_NAME	= so_long_bonus.a
 EXEC_NAME	= so_long
 
 # COMMANDS
@@ -27,17 +25,17 @@ MAKE_C		= make -C
 # DIRECTORIES
 SRC_DIR		= src/
 INC_DIR		= inc/
-OBJS_DIR	= obj/
-
-# MANDATORY - DIRECTORIES and SOURCES
+OBJ_DIR		= obj/
 MDT_DIR		= $(SRC_DIR)Mandatory/
-MDT_SRC		= $(wildcard $(MDT_DIR)*.c)
-MDT_OBJS	= $(MDT_SRC:$(MDT_DIR)%.c=$(OBJS_DIR)%.o)
-
-# BONUS - DIRECTORIES AND SOURCES
 BONUS_DIR	= $(SRC_DIR)Bonus/
+
+# MANDATORY SOURCES AND OBJS
+SRC_FILES	= $(wildcard $(MDT_DIR)*.c)
+OBJ_FILES	= $(SRC_FILES:$(MDT_DIR)%.c=$(OBJ_DIR)%.o)
+
+# BONUS SOURCES AND OBJS
 BONUS_SRC	= $(wildcard $(BONUS_DIR)*.c)
-BONUS_OBJS	= $(BONUS_SRC:$(BONUS_DIR)%.c=$(OBJS_DIR)%.o)
+BONUS_OBJS	= $(BONUS_SRC:$(BONUS_DIR)%.c=$(OBJ_DIR)%.o)
 
 # LIBFT
 LIBFT_DIR	= libft/
@@ -49,47 +47,43 @@ MLX_REPO	= https://github.com/42Paris/minilibx-linux.git
 MLX_LIB		= -L$(MLX_DIR) -lmlx -lXext -lX11 -lm
 
 # RULES
-all: $(MLX_DIR) $(NAME) $(EXEC_NAME)
+all: mlx libft $(EXEC_NAME)
 
-bonus: all $(BONUS_NAME)
+bonus: SRC_FILES := $(SRC_FILES) $(BONUS_SRC)
+bonus: OBJ_FILES := $(OBJ_FILES) $(BONUS_OBJS)
+bonus: all
 
-# MANDATORY RULES
-$(NAME): $(MDT_OBJS)
+# MANDATORY
+$(OBJ_DIR)%.o: $(MDT_DIR)%.c
+	@$(MD) $(OBJ_DIR)
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+# BONUS
+$(OBJ_DIR)%.o: $(BONUS_DIR)%.c
+	@$(MD) $(OBJ_DIR)
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+# EXEC
+$(EXEC_NAME): $(OBJ_FILES)
+	@$(CC) $(CFLAGS) $^ $(LIBFT) $(MLX_LIB) -o $(EXEC_NAME)
+
+# LIBFT
+libft:
 	@$(MAKE_C) $(LIBFT_DIR)
+
+# MINILIBX
+mlx:
+	@if [ ! -d "$(MLX_DIR)" ]; then git clone $(MLX_REPO) $(MLX_DIR); fi
 	@$(MAKE_C) $(MLX_DIR)
-	@$(CP) $(LIBFT) $(NAME)
-	@$(AR) $@ $^
 
-$(OBJS_DIR)%.o: $(MDT_DIR)%.c
-	@$(MD) $(OBJS_DIR)
-	@$(CC) $(CFLAGS) -c $< -o $@
-
-# BONUS RULES
-$(BONUS_NAME): $(BONUS_OBJS)
-	@$(RM) $(NAME)
-	@$(MD) $(OBJS_DIR)
-	@$(AR) $@ $^
-
-$(OBJS_DIR)%.o: $(BONUS_DIR)%.c
-	@$(MD) $(OBJS_DIR)
-	@$(CC) $(CFLAGS) -c $< -o $@
-
-# EXEC RULES
-$(EXEC_NAME): $(NAME)
-	@$(CC) $(CFLAGS) $(NAME) $(MLX_LIB) -o $(EXEC_NAME)
-
-# MINILIBX RULES
-$(MLX_DIR):
-	@git clone $(MLX_REPO) $(MLX_DIR)
-
-# OTHERS RULES
+# CLEANING
 clean:
-	@$(RM) $(OBJS_DIR)
+	@$(RM) $(OBJ_DIR)
 	@$(MAKE_C) $(LIBFT_DIR) clean
 	@$(MAKE_C) $(MLX_DIR) clean
 
 fclean: clean
-	@$(RM) $(NAME) $(BONUS_NAME) $(EXEC_NAME) $(MLX_DIR)
+	@$(RM) $(EXEC_NAME)
 	@$(MAKE_C) $(LIBFT_DIR) fclean
 
 re: fclean all
