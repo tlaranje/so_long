@@ -5,61 +5,90 @@
 #                                                     +:+ +:+         +:+      #
 #    By: tlaranje <tlaranje@student.42porto.com>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2025/11/12 16:40:03 by tlaranje          #+#    #+#              #
-#    Updated: 2025/11/12 16:40:04 by tlaranje         ###   ########.fr        #
+#    Created: 2025/11/13 10:52:34 by tlaranje          #+#    #+#              #
+#    Updated: 2025/11/13 11:30:49 by tlaranje         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-# Diretórios
-SRC_DIR_MANDATORY := src/Mandatory
-SRC_DIR_BONUS := src/Bonus
-OBJ_DIR := obj
-INC_DIR := inc
+# === Executable names ===
+NAME			:= so_long
+BONUS			:= so_long_bonus
 
-# Compilador e flags
-CC := gcc
-CFLAGS := -Wall -Wextra -Werror -I$(INC_DIR)
+# === Repositories ===
+MLX_REPO		:= https://github.com/42Paris/minilibx-linux.git
+LIBFT_REPO		:= https://github.com/tlaranje/libft.git
 
-# Fontes
-MANDATORY_SRC := $(wildcard $(SRC_DIR_MANDATORY)/*.c)
-BONUS_SRC := $(wildcard $(SRC_DIR_BONUS)/*.c)
+# === Directories ===
+MDT_SRC_DIR		:= src/Mandatory
+BONUS_SRC_DIR	:= src/Bonus
+OBJ_DIR			:= obj
+INC_DIR			:= inc
+LIBFT_DIR		:= libft
+MLX_DIR			:= mlx_linux
 
-# Objetos
-MANDATORY_OBJ := $(patsubst $(SRC_DIR_MANDATORY)/%.c,$(OBJ_DIR)/%.o,$(MANDATORY_SRC))
-BONUS_OBJ := $(patsubst $(SRC_DIR_BONUS)/%.c,$(OBJ_DIR)/bonus_%.o,$(BONUS_SRC))
+# === Commands ===
+CC				:= gcc
+MAKE_C			:= make -C
+RM				:= rm -rf
 
-# Executáveis
-NAME := so_long
-BONUS_NAME := so_long_bonus
+# === Flags ===
+CFLAGS			:= -Wall -Wextra -Werror -I$(INC_DIR) -I$(LIBFT_DIR) -I$(MLX_DIR)
+MXLFLAGS		:= -L$(LIBFT_DIR) -L$(MLX_DIR) -lmlx -lXext -lX11 -lm
 
-# Targets
-.PHONY: all bonus clean fclean re
+# === Source files ===
+MDT_SRC			:= $(wildcard $(MDT_SRC_DIR)/*.c)
+BONUS_SRC		:= $(wildcard $(BONUS_SRC_DIR)/*.c)
 
-all: $(OBJ_DIR) $(NAME)
+# === Object files ===
+MDT_OBJ			:= $(patsubst %.c,$(OBJ_DIR)/%.o,$(notdir $(MDT_SRC)))
+BONUS_OBJ		:= $(patsubst %.c,$(OBJ_DIR)/%.o,$(notdir $(BONUS_SRC)))
 
-bonus: $(OBJ_DIR) $(BONUS_NAME)
+# === Build targets ===
+all: $(OBJ_DIR) mlx libft $(NAME)
 
+bonus: $(OBJ_DIR) mlx libft $(BONUS)
+
+# Create obj directory if it doesn't exist
 $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)
 
-# Regras para objetos
-$(OBJ_DIR)/%.o: $(SRC_DIR_MANDATORY)/%.c
+# Compile mandatory .c files into .o files
+$(OBJ_DIR)/%.o: $(MDT_SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(OBJ_DIR)/bonus_%.o: $(SRC_DIR_BONUS)/%.c
+# Compile bonus .c files into .o files
+$(OBJ_DIR)/%.o: $(BONUS_SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Linkagem final
-$(NAME): $(MANDATORY_OBJ)
-	$(CC) $(MANDATORY_OBJ) -o $@
+# Link mandatory object files into final executable
+$(NAME): $(MDT_OBJ)
+	$(CC) $(MDT_OBJ) $(MXLFLAGS) -o $@
 
-$(BONUS_NAME): $(BONUS_OBJ)
-	$(CC) $(BONUS_OBJ) -o $@
+# Link bonus object files into final executable
+$(BONUS): $(BONUS_OBJ)
+	$(CC) $(BONUS_OBJ) $(MXLFLAGS) -o $@
 
+# Build libft
+libft:
+	if [ ! -d "$(LIBFT_DIR)" ]; then git clone $(LIBFT_REPO) $(LIBFT_DIR); fi
+	$(MAKE_C) $(LIBFT_DIR)
+
+# Build mlx (clone if missing)
+mlx:
+	if [ ! -d "$(MLX_DIR)" ]; then git clone $(MLX_REPO) $(MLX_DIR); fi
+	$(MAKE_C) $(MLX_DIR)
+
+# Remove object files
 clean:
-	rm -rf $(OBJ_DIR)
+	$(RM) $(OBJ_DIR)
+	$(MAKE_C) $(LIBFT_DIR) clean
+	$(MAKE_C) $(MLX_DIR) clean
 
+# Remove executables and object files
 fclean: clean
-	rm -f $(NAME) $(BONUS_NAME)
+	$(RM) $(NAME) $(BONUS) $(MLX_DIR) $(LIBFT_DIR)
 
+# Rebuild everything
 re: fclean all
+
+.PHONY: all bonus clean fclean re libft mlx

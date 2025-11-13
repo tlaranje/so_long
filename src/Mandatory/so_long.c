@@ -6,13 +6,13 @@
 /*   By: tlaranje <tlaranje@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 14:29:11 by tlaranje          #+#    #+#             */
-/*   Updated: 2025/11/12 16:39:12 by tlaranje         ###   ########.fr       */
+/*   Updated: 2025/11/13 10:56:29 by tlaranje         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/so_long.h"
 
-int	so_long()
+int	so_long(void)
 {
 	return (0);
 }
@@ -29,6 +29,5 @@ int	main(void)
 	(void)img;
 	(void)mlx_win;
 	mlx_loop(mlx);
-
 	return (0);
 }

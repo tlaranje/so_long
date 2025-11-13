@@ -6,19 +6,18 @@
 /*   By: tlaranje <tlaranje@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/11 14:29:11 by tlaranje          #+#    #+#             */
-/*   Updated: 2025/11/12 16:40:32 by tlaranje         ###   ########.fr       */
+/*   Updated: 2025/11/13 10:56:14 by tlaranje         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/so_long.h"
 
-int	s()
+int	s(void)
 {
 	return (0);
 }
 
-int main(void)
+int	main(void)
 {
-	return 0;
+	return (0);
 }
-
